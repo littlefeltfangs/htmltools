@@ -10,6 +10,8 @@
 
 * `css()` now fully supports setting custom CSS properties (or CSS variables) via inline styles. When the name of a value passed to `css()` starts with `--`, it will be treated as a custom CSS property and absolutely no changes will be made to the variable. For example, `css("--font_size" = "3em")` returns `--font_size:3em;` while `css(font_size = "3em")` will return `font-size:3em`. (#402)
 
+* Folder deletion and files copy in `copyDependencyToDir()` can now be suppressed with `options(htmltools.dir.preventoverwrite=TRUE)` if source and target files match. (#294)
+
 ## Bug fixes
 
 * `{htmltools}` now requires `{rlang}` version 1.0.0 or higher. (#403)
