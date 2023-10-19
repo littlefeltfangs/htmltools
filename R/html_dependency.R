@@ -343,6 +343,15 @@ copyDependencyToDir <- function(dependency, outputDir, mustWork = TRUE) {
   } else dependency$name
   target_dir <- file.path(outputDir, target_dir)
 
+  if (dependency$all_files)
+    files <- list.files(dir)
+  else
+    files <- c(find_dep_filenames(dependency$script, "src"),
+               find_dep_filenames(dependency$stylesheet, "href"),
+               find_dep_filenames(dependency$attachment, "href"))
+  
+  allow_overwrite<-!all(identical(list.files(target_dir), files), getOption("htmltools.dir.preventoverwrite",FALSE))
+  
   # completely remove the target dir because we don't want possible leftover
   # files in the target dir, e.g. we may have lib/foo.js last time, and it was
   # removed from the original library, then the next time we copy the library
@@ -352,18 +361,10 @@ copyDependencyToDir <- function(dependency, outputDir, mustWork = TRUE) {
   # dependency$version are not "" or "/" or contains no / or \; we have also
   # made sure outputDir is not "" or "/" above, so target_dir here should be
   # relatively safe to be removed recursively
-  allow_overwrite<-!all(list.files(target_dir) == list.files(dir), getOption("htmltools.dir.preventoverwrite",FALSE))
   
   if (dir_exists(target_dir) && allow_overwrite) unlink(target_dir, recursive = TRUE)
   if(!dir_exists(target_dir)) dir.create(target_dir)
   dependency$src$file <- normalizePath(target_dir, "/", TRUE)
-
-  if (dependency$all_files)
-    files <- list.files(dir)
-  else
-    files <- c(find_dep_filenames(dependency$script, "src"),
-               find_dep_filenames(dependency$stylesheet, "href"),
-               find_dep_filenames(dependency$attachment, "href"))
 
   if (length(files) == 0) {
     # This dependency doesn't include any files
