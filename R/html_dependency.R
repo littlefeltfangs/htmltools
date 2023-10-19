@@ -352,8 +352,10 @@ copyDependencyToDir <- function(dependency, outputDir, mustWork = TRUE) {
   # dependency$version are not "" or "/" or contains no / or \; we have also
   # made sure outputDir is not "" or "/" above, so target_dir here should be
   # relatively safe to be removed recursively
-  if (dir_exists(target_dir)) unlink(target_dir, recursive = TRUE)
-  dir.create(target_dir)
+  allow_overwrite<-!all(list.files(target_dir) == list.files(dir), getOption("htmltools.dir.preventoverwrite",FALSE))
+  
+  if (dir_exists(target_dir) && allow_overwrite) unlink(target_dir, recursive = TRUE)
+  if(!dir_exists(target_dir)) dir.create(target_dir)
   dependency$src$file <- normalizePath(target_dir, "/", TRUE)
 
   if (dependency$all_files)
@@ -384,7 +386,7 @@ copyDependencyToDir <- function(dependency, outputDir, mustWork = TRUE) {
   isdir <- file.info(srcfiles)$isdir
   destfiles <- ifelse(isdir, dirname(destfiles), destfiles)
 
-  mapply(function(from, to, isdir) {
+  if(allow_overwrite) mapply(function(from, to, isdir) {
     if (!dir_exists(dirname(to)))
       dir.create(dirname(to), recursive = TRUE)
     if (isdir && !dir_exists(to))
